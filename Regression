@@ -1,0 +1,40 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+# Load the uploaded Excel file
+file_path = '/mnt/data/WNBA Regressions.xlsx'
+data = pd.ExcelFile(file_path)
+
+# Load data from each sheet
+data_2023 = data.parse('2023')
+data_2022 = data.parse('2022')
+data_2021 = data.parse('2021')
+
+# Concatenate the data from the three sheets into a single DataFrame
+data_combined = pd.concat([data_2023, data_2022, data_2021], ignore_index=True)
+
+# Rename columns to remove special characters and spaces
+data_combined.columns = [
+    'TEAM', 'GP', 'W', 'L', 'WIN%', 'EFG%', 'FTA_RATE', 'TOV%', 'OREB%', 'OPP_EFG%', 
+    'OPP_FTA_RATE', 'OPP_TOV%', 'OPP_OREB%'
+]
+
+# Prepare the data for regression
+X = data_combined[['EFG%', 'FTA_RATE', 'TOV%', 'OREB%', 'OPP_EFG%', 'OPP_FTA_RATE', 'OPP_TOV%', 'OPP_OREB%']]
+y = data_combined['WIN%']
+
+# Perform linear regression
+regression = LinearRegression()
+regression.fit(X, y)
+
+# Get the coefficients
+coefficients = regression.coef_
+
+# Create DataFrame for the coefficients
+coefficients_df = pd.DataFrame({
+    'Feature': ['EFG%', 'FTA_RATE', 'TOV%', 'OREB%', 'OPP_EFG%', 'OPP_FTA_RATE', 'OPP_TOV%', 'OPP_OREB%'],
+    'Coefficient': coefficients
+})
+
+# Display the coefficients
+print(coefficients_df)
